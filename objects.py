@@ -6,10 +6,10 @@ import yfinance as yf
 class TickerExtractor:
     def __init__(self, csv_file, stock_exchange):
         self.csv = csv_file
-        self.ticker_list={}
+        self.ticker_list=[]
         self.stock_exchange = stock_exchange
-        self.nasdaq_tickers={'Nasdaq tickers list is empty, load a list from csv file'}
-        self.nyse_tickers = {'NYSE tickers list is empty at the moment, load a list from csv file'}
+        self.nasdaq_tickers=['Nasdaq tickers list is empty, load a list from csv file']
+        self.nyse_tickers = ['NYSE tickers list is empty at the moment, load a list from csv file']
         self.extract_tickers()
 
 
@@ -76,15 +76,29 @@ class StockInfoReader:
     def __init__(self, nasdaq_list = {}, nyse_list = {}):
         self.nasdaq = nasdaq_list
         self.nyse = nyse_list
+        self.stock_info={}
         
     def get_info_single_ticker(self, ticker):
         dat = yf.Ticker(ticker)
-        return dat.info
+        self.stock_info=dat.info
+        return self.stock_info
     
     def stock_data_console_rpt(self, data_dictionary):
         for keys in data_dictionary:
             print('{} : {}'.format(keys, data_dictionary[keys]))
-            
+    
+    def analyse_fifty_two_week_low(self, ticker, max_gap=None):
+        info=self.get_info_single_ticker(ticker)
+        fifty_two_week_low = info['fiftyTwoWeekLow']
+        day_high = info['dayHigh']
+        gap = (day_high-fifty_two_week_low)/fifty_two_week_low*100
+        
+        if (max_gap==None):
+            fifty_two_week_low_dict = {"Ticker":ticker, "Analysis": "52-Week-Low", "Day High":day_high, "52-Week-Low":fifty_two_week_low, "Gap":gap, "Max Gap Filter": max_gap}
+            print(fifty_two_week_low_dict)
+            return fifty_two_week_low_dict
+        
+        
     
     
          
