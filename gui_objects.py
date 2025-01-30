@@ -60,42 +60,81 @@ class Menu:
     def __init__(self, overview, main_display, menu):
         self.font = ('arial',20)
         self.label_font = ('arial',30)
+        self.header_font = ('arial',35)
         self.overview = overview
         self.main_display = main_display
         self.menu = menu
+        
         monthly_account_audit_button = Button(self.menu, text="Monthly Account Audit", font=self.font, command=self.display_monthly_account_audit)
         monthly_account_audit_button.grid(row=0,column=0)
         
+        upload_tickers_button = Button(self.menu, text="Upload List of Tickers", font=self.font, command=self.upload_tickers)
+        upload_tickers_button.grid(row=0,column=1)
+        
                
+    def clear_frame(self, frame):
+        self.frame_to_clear = frame
+        for widget in self.frame_to_clear.winfo_children():
+            widget.destroy()
+        
+        
+    def upload_tickers(self):
+        self.clear_frame(self.main_display)
+        
+        
     def display_monthly_account_audit(self):
+        self.clear_frame(self.main_display)
         # OBJECTS.PY BANK OBJECT
         self.bank = Bank()
         # MAIN DISPLAY
-        options_list = ['Owner Contribution', 'Owner Withdrawal', 'Update Value Of Titles']
-        self.audit_box = ttk.Combobox(self.main_display,values=options_list, font=self.font)
-        self.audit_box.grid(row=0, column=0)
+        deposit_operation_button = Button(self.main_display, text="Owner Deposit", font=self.font, command=self.deposit_money)
+        deposit_operation_button.grid(row=0, column=0, sticky='n,s,e,w')
+        
+        withdrawal_operation_button = Button(self.main_display, text="Owner Withdrawal", font=self.font, command=self.withdraw_money)
+        withdrawal_operation_button.grid(row=0, column=1, sticky='n,s,e,w')
+        
+        update_titles_button = Button(self.main_display, text="Update Cash and Titles", font=self.font, command=self.update_cash_and_titles)
+        update_titles_button.grid(row=0, column=2, sticky='n,s,e,w')
+        
+        self.bank_operation_input = Entry(self.main_display, width=20, font=self.font)
+        self.bank_operation_input.grid(row=1, column=0)
         
         # OVERVIEW
         
-        account_balance_label_frame = LabelFrame(self.overview, text="Balance", font=self.font)
-        account_balance_label_frame.grid(row=0,column=0, sticky='n,s,e,w')
-        account_balance_label = Label(account_balance_label_frame, text='{}'.format(self.bank.get_balance()), font=self.label_font)
-        account_balance_label.grid(row=0, column=0, sticky='n,s,e,w')
-        
-        titles_label_frame = LabelFrame(self.overview, text="Titles & Cash Equivalents", font=self.font)
-        titles_label_frame.grid(row=1,column=0, sticky='n,s,e,w')
-        titles_label = Label(titles_label_frame, text='{}'.format(self.bank.get_value_in_titles()), font=self.label_font)
-        titles_label.grid(row=0, column=0, sticky='n,s,e,w')
+        account_balance_label_frame = LabelFrame(self.overview, text="Titles & Cash", font=self.header_font)
+        account_balance_label_frame.grid(row=0,column=0)
+        self.account_balance_label = Label(account_balance_label_frame, text='{}'.format(self.bank.get_cash_and_titles()), font=self.header_font)
+        self.account_balance_label.grid(row=0, column=0)
         
         contributions_label_frame = LabelFrame(self.overview, text="Owner's Contributions", font=self.font)
-        contributions_label_frame.grid(row=2,column=0, sticky='n,s,e,w')
-        contributions_label = Label(contributions_label_frame, text='{}'.format(self.bank.get_owner_contribution()), font=self.label_font)
-        contributions_label.grid(row=0, column=0, sticky='n,s,e,w')
+        contributions_label_frame.grid(row=1,column=0, sticky='n,s,e,w')
+        self.contributions_label = Label(contributions_label_frame, text='{}'.format(self.bank.get_owner_contribution()), font=self.label_font)
+        self.contributions_label.grid(row=0, column=0, sticky='n,s,e,w')
         
         roi_label_frame = LabelFrame(self.overview, text="Return on Investment", font=self.font)
-        roi_label_frame.grid(row=3,column=0, sticky='n,s,e,w')
-        roi_label = Label(roi_label_frame, text='{}'.format(self.bank.get_roi()), font=self.label_font)
-        roi_label.grid(row=0, column=0, sticky='n,s,e,w')
+        roi_label_frame.grid(row=2,column=0, sticky='n,s,e,w')
+        self.roi_label = Label(roi_label_frame, text='{}'.format(self.bank.get_roi()), font=self.label_font)
+        self.roi_label.grid(row=0, column=0, sticky='n,s,e,w')
+        
+    def update_cash_and_titles(self):
+        self.bank.update_cash_and_titles(10000)
+        self.update_overview()
+        
+        
+    def update_overview(self):
+        self.contributions_label.configure(text='{}'.format(self.bank.get_owner_contribution()))
+        self.account_balance_label.configure(text='{}'.format(self.bank.get_cash_and_titles()))
+        self.roi_label.configure(text='{}'.format(self.bank.get_roi()))
+
+        
+    def deposit_money(self):
+        self.bank.account_deposit(1000)
+        self.update_overview()
+                
+    def withdraw_money(self):
+        self.bank.account_withdrawal(100)
+        self.update_overview()        
+        
         
 
         
