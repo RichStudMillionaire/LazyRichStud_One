@@ -5,6 +5,16 @@ import yfinance as yf
 import datetime
 import time
 
+class LogManager:
+    def __init__(self):
+        pass
+    
+    def create_log_file(self, file_name):
+        with open(file_name, "w") as file:
+            file.write(file_name)
+            file.write("Created {}".format(TimeManager().get_today_in_datetime()))
+        
+
 class TimeManager:
     def __init__(self):
         pass
