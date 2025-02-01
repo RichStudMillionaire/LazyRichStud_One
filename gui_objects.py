@@ -1,6 +1,7 @@
 from objects import Bank
-
+from objects import TickerExtractor
 from tkinter import *
+from tkinter import filedialog
 from tkinter import ttk
 
 
@@ -76,10 +77,36 @@ class Menu:
         self.frame_to_clear = frame
         for widget in self.frame_to_clear.winfo_children():
             widget.destroy()
-        
+            
+    def upload_tickers_button_clicked(self):
+        file_name = self.file_input.get()
+        stock_exchange = self.stock_market_input.get()
+        self.ticker_extractor = TickerExtractor(file_name, stock_exchange)
+        print(self.ticker_extractor.nasdaq_tickers)
+        print()
+        print(self.ticker_extractor.get_nasdaq_list_length())
+    
+            
+            
+    
         
     def upload_tickers(self):
         self.clear_frame(self.main_display)
+        file_name_label_frame = LabelFrame(self.main_display, text="File Name", font=self.font)
+        file_name_label_frame.grid(row=0, column=0)
+        
+        self.file_input = Entry(file_name_label_frame, text="", width=30, font=self.font)
+        self.file_input.grid(row=0, column=0)
+        
+        name_stock_market_label_frame = LabelFrame(self.main_display, text="nasdaq or nyse", font=self.font)
+        name_stock_market_label_frame.grid(row=0, column=1)
+        
+        self.stock_market_input = Entry(name_stock_market_label_frame, text="", width=30, font=self.font)
+        self.stock_market_input.grid(row=0, column=1)
+        
+        load_ticker_list_button = Button(self.main_display,text="Upload Tickers", command=self.upload_tickers_button_clicked, font=self.font)
+        load_ticker_list_button.grid(row=1, column=0)
+
         
         
     def display_monthly_account_audit(self):
