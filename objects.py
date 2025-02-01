@@ -4,15 +4,26 @@ import csv
 import yfinance as yf
 import datetime
 import time
+import os
 
 class LogManager:
-    def __init__(self):
-        pass
+    def __init__(self, file_name):
+        self.file_name = file_name
     
-    def create_log_file(self, file_name):
-        with open(file_name, "w") as file:
-            file.write(file_name)
-            file.write("Created {}".format(TimeManager().get_today_in_datetime()))
+    def create_log_file(self):
+        with open(self.file_name, "w") as file:
+            file.write(self.file_name)
+            file.write("\n")
+            
+    def new_paragraph(self, paragraph):
+        with open(self.file_name, "a") as file:
+            file.write(paragraph)
+            file.write("\n")
+    
+            
+    def delete(self, file_name):
+        os.remove(file_name)
+        
         
 
 class TimeManager:

@@ -92,7 +92,7 @@ class Menu:
         
     def upload_tickers(self):
         self.clear_frame(self.main_display)
-        file_name_label_frame = LabelFrame(self.main_display, text="File Name", font=self.font)
+        file_name_label_frame = LabelFrame(self.main_display, text="file name", font=self.font)
         file_name_label_frame.grid(row=0, column=0)
         
         self.file_input = Entry(file_name_label_frame, text="", width=30, font=self.font)
