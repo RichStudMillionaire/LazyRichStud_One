@@ -5,6 +5,15 @@ import yfinance as yf
 import datetime
 import time
 import os
+import json
+
+class TallyCounter:
+    def __init__(self):
+        self.count = 0
+    def click(self):
+        self.count+=1
+    def reset(self):
+        self.count = 0
 
 class LogManager:
     def __init__(self, file_name):
@@ -125,11 +134,16 @@ class StockInfoReader:
         self.nasdaq = nasdaq_list
         self.nyse = nyse_list
         self.stock_info={}
+        self.tally = TallyCounter()
+        self.dividend_filtered_dict={}
         
     def get_info_single_ticker(self, ticker):
-        dat = yf.Ticker(ticker)
-        self.stock_info=dat.info
-        return self.stock_info
+        try:
+            dat = yf.Ticker(ticker)
+            self.stock_info=dat.info
+            return self.stock_info
+        except Exception as e: 
+            print("Couldn't extract info from {}\n{}".format(ticker,e))
     
     def stock_pays_dividends_bool(self,ticker):
         info = self.get_info_single_ticker(ticker)
@@ -142,9 +156,35 @@ class StockInfoReader:
             
         except: 
             return pays_dividends
-            
-            
     
+    def long_pause(self, pause_seconds):
+        print("Zzz... Long Pause")
+        time.sleep(pause_seconds)
+            
+    def pause_info_extraction(self, pause_rate):
+        self.tally.click()
+        if self.tally.count == pause_rate:
+            print("Zzzzz Sleeping")
+            time.sleep(60)
+            self.tally.reset()
+            
+    def filter_ticker_list_on_dividends(self, ticker_list, chunk_size, return_dividend_stocks = True):
+        self.dividend_tickers = {}
+        self.no_dividend_tickers = {}
+        self.return_dividends = return_dividend_stocks
+        
+        for ticker in ticker_list:
+            self.pause_info_extraction(chunk_size)
+            bool=self.stock_pays_dividends_bool(ticker)
+            if bool:        
+                self.dividend_tickers[ticker]=self.get_info_single_ticker(ticker)
+            else:
+                self.no_dividend_tickers[ticker] = self.get_info_single_ticker(ticker)
+
+        if self.return_dividends:
+            return self.dividend_tickers
+        else:
+            return self.no_dividend_tickers
     
     def stock_data_console_rpt(self, data_dictionary):
         for keys in data_dictionary:
@@ -188,6 +228,34 @@ class StockInfoReader:
         elif (gap <= max_gap):
             fifty_day_ma_dict = {"Ticker":ticker, "Analysis": "200-Day Moving Average", "Day High":day_high, "200-Day Moving Average":two_hundred_day_ma, "Gap":gap, "Max Gap Filter": max_gap}
             return fifty_day_ma_dict
+        
+class HardDrive:
+    def __init__(self):
+        self.dict = {}
+        self.json_string = ""
+        
+        
+    def convert_dict_to_json_string(self):
+        self.json_string = json.dumps(self.dict, indent=1)
+        
+    def save(self, dict, file_name):
+        self.dict = dict
+        self.convert_dict_to_json_string()
+        
+        with open(file_name, 'w') as file:
+            file.write(self.json_string)
+            
+    def load(self, file_name):
+        try:    
+            with open(file_name,'r') as file:
+                self.dict = json.load(file)
+                return self.dict
+        except:
+            return False
+            
+            
+        
+        
             
         
         
