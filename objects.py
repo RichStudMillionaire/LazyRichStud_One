@@ -144,6 +144,7 @@ class StockInfoReader:
             return self.stock_info
         except Exception as e: 
             print("Couldn't extract info from {}\n{}".format(ticker,e))
+            self.long_pause(300)
     
     def stock_pays_dividends_bool(self,ticker):
         info = self.get_info_single_ticker(ticker)
@@ -169,23 +170,38 @@ class StockInfoReader:
             self.tally.reset()
             
     def filter_ticker_list_on_dividends(self, ticker_list, chunk_size, return_dividend_stocks = True):
-        self.dividend_tickers = {}
-        self.no_dividend_tickers = {}
+        self.dividend_tickers = []
+        self.no_dividend_tickers = []
         self.return_dividends = return_dividend_stocks
         
         for ticker in ticker_list:
             self.pause_info_extraction(chunk_size)
             bool=self.stock_pays_dividends_bool(ticker)
             if bool:        
-                self.dividend_tickers[ticker]=self.get_info_single_ticker(ticker)
+                self.dividend_tickers.append(ticker)
             else:
-                self.no_dividend_tickers[ticker] = self.get_info_single_ticker(ticker)
+                self.no_dividend_tickers.append(ticker)
 
         if self.return_dividends:
             return self.dividend_tickers
         else:
             return self.no_dividend_tickers
-    
+        
+    def filter_fifty_ma(self, ticker_list, ma_gap, chunk_size):
+        for ticker in ticker_list:
+            self.pause_info_extraction(chunk_size)
+            info=self.get_info_single_ticker(ticker)
+            fifty_ma = info['fiftyDayAverage']
+            day_high = info['dayHigh']
+            
+            if (day_high >= fifty_ma):
+                pass
+            else:
+                gap = (fifty_ma - day_high)/fifty_ma*100 
+                if gap < ma_gap:
+                    return ticker
+
+                        
     def stock_data_console_rpt(self, data_dictionary):
         for keys in data_dictionary:
             print('{} : {}'.format(keys, data_dictionary[keys]))
@@ -203,19 +219,34 @@ class StockInfoReader:
             fifty_two_week_low_dict = {"Ticker":ticker, "Analysis": "52-Week-Low", "Day High":day_high, "52-Week-Low":fifty_two_week_low, "Gap":gap, "Max Gap Filter": max_gap}
             return fifty_two_week_low_dict
         
-    def analyse_fifty_day_ma(self, ticker, max_gap=None):
+    def analyse_fifty_day_ma(self, ticker, below_ma_gap=None):
         info=self.get_info_single_ticker(ticker)
-        fifty_day_ma = info['fiftyDayAverage']
+        fifty_ma = info['fiftyDayAverage']
         day_high = info['dayHigh']
-        gap = (day_high-fifty_day_ma)/fifty_day_ma*100
+        self.analyse_fifty_ma_dict ={}
         
-        if (max_gap==None):
-            fifty_day_ma_dict = {"Ticker":ticker, "Analysis": "50-Day Moving Average", "Day High":day_high, "50-Day Moving Average":fifty_day_ma, "Gap":gap, "Max Gap Filter": 'No Gap Filter'}
-            return fifty_day_ma_dict
-        elif (gap <= max_gap):
-            fifty_day_ma_dict = {"Ticker":ticker, "Analysis": "50-Day Moving Average", "Day High":day_high, "50-Day Moving Average":fifty_day_ma, "Gap":gap, "Max Gap Filter": max_gap}
-            return fifty_day_ma_dict
-        
+        if (day_high >= fifty_ma):
+            pass
+        else:
+            gap = (fifty_ma - day_high)/fifty_ma*100 
+            if below_ma_gap!=None:
+                if gap < below_ma_gap:
+                    self.analyse_fifty_ma_dict["symbol"]=ticker
+                    self.analyse_fifty_ma_dict["fiftyDayAverage"]=fifty_ma
+                    self.analyse_fifty_ma_dict["dayHigh"]=day_high
+                    self.analyse_fifty_ma_dict["fiftyDayAverageGap"] = gap
+                    
+            else:   
+                self.analyse_fifty_ma_dict["symbol"]=ticker
+                self.analyse_fifty_ma_dict["fiftyDayAverage"]=fifty_ma
+                self.analyse_fifty_ma_dict["dayHigh"]=day_high
+                self.analyse_fifty_ma_dict["fiftyDayAverageGap"] = below_ma_gap
+                
+        return self.analyse_fifty_ma_dict
+                
+    def filter_fifty_day_ma(self, ticker, below_ma_gap=None):
+        pass
+                    
     def analyse_two_hundred_day_ma(self, ticker, max_gap=None):
         info=self.get_info_single_ticker(ticker)
         two_hundred_day_ma = info['twoHundredDayAverage']
@@ -228,6 +259,15 @@ class StockInfoReader:
         elif (gap <= max_gap):
             fifty_day_ma_dict = {"Ticker":ticker, "Analysis": "200-Day Moving Average", "Day High":day_high, "200-Day Moving Average":two_hundred_day_ma, "Gap":gap, "Max Gap Filter": max_gap}
             return fifty_day_ma_dict
+        
+    def analyse_price_target(self):
+        pass
+        
+    def flag_two_hundred_ma(self):
+        pass
+    
+    def flag_fifty_two_week_low(self):
+        pass
         
 class HardDrive:
     def __init__(self):
