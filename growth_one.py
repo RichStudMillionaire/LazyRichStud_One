@@ -1,4 +1,5 @@
 from yf_api import Filter
+from yf_api import InfoExtractor
 from objects import HardDrive
 from objects import TickerExtractor
 from objects import StockInfoReader
@@ -45,10 +46,12 @@ class GrowthOne():
         self.run_system()
     
     def run_system(self):
-        f=Filter(200)
-        l=f.fifty_day_ma_list(self.nasdaq_no_div)
-        fl=f.check_gap_higher_than(l, 20)
-        f.print_rpt(fl)
+        info = InfoExtractor(self.chunk_size)
+        filter = Filter(self.chunk_size)
+
+    
+    
+
         
     
             

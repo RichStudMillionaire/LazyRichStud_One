@@ -91,10 +91,7 @@ class TickerExtractor:
     
     def get_nyse_list_length(self):
         return len(self.nyse_tickers)
-    
             
-        
-        
 class Bank:
     def __init__(self):
         self.deposit=0
@@ -271,7 +268,7 @@ class StockInfoReader:
         
 class HardDrive:
     def __init__(self):
-        self.dict = {}
+        self.list = {}
         self.json_string = ""
         
         
