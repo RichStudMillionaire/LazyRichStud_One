@@ -18,7 +18,8 @@ class TickerInfo:
     def get_single_ticker_info_slim(self, ticker):
         dat = yf.Ticker(ticker)
         info=dat.info
-        keys_to_keep = ['symbol', 'dayHigh', 'fiftyDayAverage', 'twoHundredDayAverage', 'targetHighPrice', 'targetLowPrice', 'targetMedianPrice', 'fiftyTwoWeekLow', 'dividendYield', 'payoutRatio', 'fiveYearAverageYield', 'lastDividendValue','lastDividendDate']
+        keys_to_keep = ['symbol', 'dayHigh', 'fiftyDayAverage', 'twoHundredDayAverage', 'targetHighPrice', 'targetLowPrice', 'targetMedianPrice', 'fiftyTwoWeekLow', 
+                        'dividendYield', 'payoutRatio', 'fiveYearAverageYield', 'lastDividendValue','lastDividendDate', 'trailingEps', 'forwardEps']
         stock_info_slim_dict = {key: info[key] for key in keys_to_keep if key in info}
         key_to_verify_dividend = 'dividendYield'
         if key_to_verify_dividend in stock_info_slim_dict:
@@ -51,6 +52,36 @@ class TickerInfo:
                 filtered_list.append(slim_dict)
         return filtered_list
     
+    def high_dividend_filter(self, list_of_slim_dicts):
+        filtered_list=[]
+        for slim_dict in list_of_slim_dicts:
+            if 'stockPaysHighDividends' in slim_dict:
+                filtered_list.append(slim_dict)
+        return filtered_list
+    
+    def undervalued_filter(self, list_of_slim_dicts, gap):
+        filtered_list = []
+        for slim_dict in list_of_slim_dicts:
+            if 'targetMedianPrice' in slim_dict:
+                price = slim_dict['dayHigh']
+                target = slim_dict['targetMedianPrice']
+                real_gap = (target-price)/target*100
+                if price < target and real_gap >= gap:
+                    filtered_list.append(slim_dict)
+        return filtered_list
+                    
+    def fifty_two_week_low_filter(self, list_of_slim_dicts, gap):
+        filtered_list = []
+        for slim_dict in list_of_slim_dicts:
+            if 'fiftyTwoWeekLow' in slim_dict:
+                day_high = slim_dict['dayHigh']
+                low_52 = slim_dict['fiftyTwoWeekLow']
+                real_gap = (day_high-low_52)/day_high*100
+                slim_dict['fiftyTwoWeekLowGap'] = real_gap
+                if real_gap <= gap:
+                    filtered_list.append(slim_dict)
+        return filtered_list
+                
     def below_fifty_day_moving_average_filter(self, list_of_slim_dicts, gap):
         filtered_list = []
         for slim_dict in list_of_slim_dicts:
@@ -58,6 +89,7 @@ class TickerInfo:
                 day_high = slim_dict['dayHigh']
                 ma = slim_dict['fiftyDayAverage']
                 real_gap = (ma-day_high)/ma*100
+                slim_dict['fiftyDayAverageGap']=real_gap
                 if slim_dict['dayHigh'] < slim_dict['fiftyDayAverage'] and real_gap >= gap:
                     filtered_list.append(slim_dict)
         return filtered_list 
@@ -69,6 +101,7 @@ class TickerInfo:
                 day_high = slim_dict['dayHigh']
                 median_target = slim_dict['targetMedianPrice']
                 real_gap = (median_target-day_high)/median_target*100
+                slim_dict['targetMedianPriceGap'] = real_gap
                 if day_high < median_target and real_gap >= gap:
                     filtered_list.append(slim_dict)
         return filtered_list
@@ -78,6 +111,14 @@ class TickerInfo:
         for slim_dict in list_of_slim_dicts:
             if 'dayHigh' in slim_dict:
                 if slim_dict['dayHigh'] >= min_stock_price:
+                    filtered_list.append(slim_dict)
+        return filtered_list
+    
+    def payout_ratio_filter(self, list_of_slim_dicts):
+        filtered_list = []
+        for slim_dict in list_of_slim_dicts:
+            if 'payoutRatio' in slim_dict:
+                if slim_dict['payoutRatio'] < 1:
                     filtered_list.append(slim_dict)
         return filtered_list
                 
@@ -208,15 +249,13 @@ class GrowthSystem:
             print("No active session : Starting a new session, please wait")
             self.start_new_session()
         else:
-            pass
+            print("Restoring active session ... Please wait")
+            self.restore_session()
     def start_new_session(self):
         tickers = ExtractTickersFromCsv("nasdaq.csv","nyse.csv")
         self.nasdaq = tickers.get_nasdaq()
         self.nyse = tickers.get_nyse()
         self.nasdaq_and_nyse = tickers.get_nasdaq_plus_nyse()
-        self.hard_drive.save(self.nasdaq, "SessionNasdaq.json")
-        self.hard_drive.save(self.nyse, "SessionNyse.json")
-        self.hard_drive.save(self.nasdaq_and_nyse, "SessionNasdaqAndNyse.json")
         self.collect_ticker_info(self.nasdaq_and_nyse)
     def collect_ticker_info(self, ticker_list):
 
@@ -235,7 +274,39 @@ class GrowthSystem:
         print(self.filtered_ticker_list)
         self.hard_drive.save(self.filtered_ticker_list, 'growthWinners.json')
         
-        
+class DividendSystem:
+    def __init__(self):
+        self.hard_drive = HardDrive()
+        self.info = TickerInfo()
+        self.nasdaq = []
+        self.nyse = []
+        self.nasdaq_and_nyse = []
+        self.booth()
+    def booth(self):
+        self.check_for_active_session()
+    def check_for_active_session(self):
+        self.session=self.hard_drive.load("ActiveSession.json")
+        if self.session == False:
+            print("No active session : Starting a new session, please wait")
+            self.start_new_session()
+        else:
+            print("Restoring active session ... Please wait")
+            self.restore_session()
+    def start_new_session(self):
+        tickers = ExtractTickersFromCsv("nasdaq.csv","nyse.csv")
+        self.nasdaq = tickers.get_nasdaq()
+        self.nyse = tickers.get_nyse()
+        self.nasdaq_and_nyse = tickers.get_nasdaq_plus_nyse()
+        self.collect_ticker_info(self.nasdaq_and_nyse)
+    def collect_ticker_info(self, ticker_list):
+        info_list=self.info.get_info_from_ticker_list(ticker_list)
+        self.hard_drive.save(info_list, "ActiveSession.json")
+    def restore_session(self):
+        self.filtered_list = self.info.high_dividend_filter(self.session)
+        self.filtered_list = self.info.fifty_two_week_low_filter(self.filtered_list,5)
+        self.filtered_list = self.info.payout_ratio_filter(self.filtered_list)
+        self.finalists = self.info.get_str_from_dict(self.filtered_list)
+        print(self.finalists)
         
         
         
