@@ -254,22 +254,30 @@ class ExtractTickersFromCsv:
         
 class Salary:
     def __init__(self):
-        self.salary = 1
+        self.regular_salary = 1200
+        self.lazy_salary = 1
         self.pay_frequency = 'Biweekly'
         self.raise_frequency = 'Monthly'
         self.raise_rate = .25
-    def renegociate(self, new_salary):
-        self.salary = new_salary
+    def set_lazy_salary(self, new_salary):
+        self.lazy_salary = new_salary
+    def get_lazy_salary(self):
+        return self.lazy_salary
     def set_first_day_of_work(self):
         pass
     def print_compensation_report_current(self):
         pass
     def print_compensation_report_history(self):
         pass
+    def set_regular_salary(self, regular_salary):
+        self.regular_salary = regular_salary
+    def get_regular_salary(self):
+        return self.regular_salary
 
 class Ledger:
     def __init__(self):
         self.hard_drive = HardDrive()
+        self.value_of_titles = 0
         self.gross_revenue = 0
         self.net_revenue = 0
         self.salary_paid = 0
@@ -307,6 +315,9 @@ class Ledger:
     
     def read(self):
         pass
+    
+    def get_value_of_titles(self):
+        return self.value_of_titles
         
 
 class GrowthSystem:
