@@ -4,12 +4,53 @@ import yfinance as yf
 import json
 import os
 from datetime import datetime
+from datetime import timedelta
 from datetime import date
-from dateutil.relativedelta import relativedelta
 import csv
 import time
 import operator
+import requests
+import pickle
+from objects import TallyCounter
+import calendar
 
+class Timekeeper:
+    def __init__(self):
+        pass
+    def set_datetime_object(self,yyyy, m, d, hours, minutes):
+        return datetime(yyyy,m,d,hours, minutes)
+    
+    def get_minutes_passed_between_dates(self, most_recent_datetime, older_datetime):
+        delta = most_recent_datetime - older_datetime
+        minutes = delta.total_seconds()/60
+        return int(minutes)
+    def get_hours_passed_between_dates(self, most_recent_datetime, older_datetime):
+        delta = most_recent_datetime - older_datetime
+        hours = delta.total_seconds()/3600
+        return int(hours)
+    def get_days_passed_between_dates(self,most_recent_datetime, older_datetime):
+        n=most_recent_datetime
+        o=older_datetime
+        hours = self.get_hours_passed_between_dates(n,o)
+        return int(hours/24)
+    def get_days_in_month(self, int_month):
+        year = datetime.now().year
+        nb_of_days = calendar.monthrange(year,int_month)
+        return nb_of_days[1]
+    def get_days_left_in_the_month(self):
+        month=datetime.now().month
+        day = datetime.now().day
+        nb = self.get_days_in_month(month)
+        left = nb-day
+        return left
+    def change_month(self, current):
+        if current+1 == datetime.today().month:
+            current = datetime.today().month
+        return current
+    
+        
+        
+    
 class TickerInfo:
     def __init__(self):
         pass
@@ -193,7 +234,61 @@ class Timestamp:
         return datetime.now()
     def today(self):
         return date.today()
-    
+
+class Xchange:
+    def __init__(self):
+        self.api_key = '47Z4YH7G52K2NFI8'
+        self.tally = TallyCounter()
+        self.usd = 'USD'
+        self.cad = 'CAD'  
+        self.rates = {}
+    def get_rate_usd_to_cad(self):
+        self.tally.click()
+        if self.tally.count < 10:
+            url = f'https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE&from_currency={self.usd}&to_currency={self.cad}&apikey={self.api_key}'
+            response = requests.get(url)
+            data = response.json()
+            exchange_rate = data['Realtime Currency Exchange Rate']['5. Exchange Rate']
+            self.rates['usdToCad'] = exchange_rate
+            return float(exchange_rate)
+        else:
+            print('Put rates in memory, {} requests made, 25 a day allowed'.format(self.tally.count))
+            self.save_rates(self.rates)
+    def get_rate_cad_to_usd(self):
+        self.tally.click()
+        if self.tally.count < 10:
+            url = f'https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE&from_currency={self.cad}&to_currency={self.usd}&apikey={self.api_key}'
+            response = requests.get(url)
+            data = response.json()
+            exchange_rate = data['Realtime Currency Exchange Rate']['5. Exchange Rate']
+            self.rates['cadToUsd'] = exchange_rate
+            return float(exchange_rate)
+        else:
+            print('Put rates in memory, {} requests made, 25 a day allowed'.format(self.tally.count))
+    def in_cad_out_usd(self, cad_amount):
+        rate = self.get_rate_cad_to_usd()
+        result = cad_amount*rate
+        return result
+    def in_usd_out_cad(self, usd_amount):
+        rate = self.get_rate_usd_to_cad()
+        result = usd_amount*rate
+        return result
+    def in_cad_out_usd_string(self, cad_amount):
+        cad = float(cad_amount)
+        result = self.in_cad_out_usd(cad)
+        result = round(result,2)
+        return '{:.2f} $ USD'.format(result)
+    def in_usd_out_cad_string(self, usd_amount):
+        usd = float(usd_amount)
+        result = self.in_usd_out_cad(usd)
+        return '{:.2f} $ CAD'.format(result) 
+    def string_cad(self, cad_amount):
+        return '{:.2f} $ CAD'.format(cad_amount)
+    def string_usd(self, usd_amount):
+        return '{:.2f} $ USD'.format(usd_amount)
+    def save_rates(self, rates_dict):
+        pass
+      
 class ChunkManager:
     def __init__(self, chunk_size, pause_time_in_seconds, ticker_list):
         self.chunk_size = chunk_size
@@ -254,15 +349,36 @@ class ExtractTickersFromCsv:
         
 class Salary:
     def __init__(self):
-        self.regular_salary = 1200
-        self.lazy_salary = 1
+        self.xchange = Xchange()
+        self.regular_salary = 0
+        self.investment_rate = 0.05
+        self.lazy_salary = 0
+        self.data={}
         self.pay_frequency = 'Biweekly'
         self.raise_frequency = 'Monthly'
         self.raise_rate = .25
     def set_lazy_salary(self, new_salary):
+        lazy = {}
         self.lazy_salary = new_salary
+        lazy['cad']=self.lazy_salary
+        new_usd = self.xchange.in_cad_out_usd(new_salary)
+        lazy['usd'] = new_usd
+        lazy['cadStr'] = self.xchange.string_cad(new_salary)
+        lazy['usdStr'] = self.xchange.string_usd(new_usd)
+        self.data['lazySalary'] = lazy
+    
     def get_lazy_salary(self):
         return self.lazy_salary
+    
+    def get_investment_rate(self):
+        return '{}%'.format(self.investment_rate*100)
+    
+    def get_monthly_investment(self):
+        investment = self.regular_salary*self.investment_rate
+        self.xchange.string_cad(investment)
+    
+    def get_all_salary_data(self):
+        return self.data
     def set_first_day_of_work(self):
         pass
     def print_compensation_report_current(self):
@@ -271,18 +387,44 @@ class Salary:
         pass
     def set_regular_salary(self, regular_salary):
         self.regular_salary = regular_salary
+        regular = {}
+        regular['cad']=self.regular_salary
+        new_usd = self.xchange.in_cad_out_usd(regular_salary)
+        regular['usd'] = new_usd
+        regular['cadStr'] = self.xchange.string_cad(regular_salary)
+        regular['usdStr'] = self.xchange.string_usd(new_usd)
+        self.data['regularSalary'] = regular
     def get_regular_salary(self):
         return self.regular_salary
 
 class Ledger:
     def __init__(self):
         self.hard_drive = HardDrive()
+        self.time = Timestamp()
         self.value_of_titles = 0
         self.gross_revenue = 0
         self.net_revenue = 0
         self.salary_paid = 0
-        self.ledger = []
+        self.cash = 0
+        self.titles = 0
+        self.owner_contributions_total=0
+        self.ledger = {}
+
+    def post_owner_cash_contribution(self, amount_cad):
+        owner_contribution = {}
+        
+        usd = Xchange().in_cad_out_usd(amount_cad) 
+        owner_contribution['date'] = Timestamp().today()
+        owner_contribution['cad'] = amount_cad
+        owner_contribution['usd'] = usd
+        owner_contribution['cadStr'] = Xchange().string_cad(amount_cad)
+        owner_contribution['usdStr'] = Xchange().string_usd(usd)
+        owner_contribution['totalCad'] = self.owner_contributions_total
+        index = len(self.ledger)
+        print(index)
+        self.ledger[index] = owner_contribution
     
+        
     def buy_stock(self, ticker, qty, price):
         ledger_entry = {}
         ledger_entry['symbol'] = ticker
