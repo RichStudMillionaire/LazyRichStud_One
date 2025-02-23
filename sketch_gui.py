@@ -1,11 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
-from systems import Salary
-from systems import Ledger
-from systems import Xchange
-from systems import Timekeeper
-
-
+from financial_util import Salary, Ledger, Xchange, CreditCard, Escrow
+from time_util import Timekeeper
 
 class LazyRichMainScreen():
     def __init__(self, root):
@@ -13,16 +9,14 @@ class LazyRichMainScreen():
         self.ledger = Ledger()
         self.xchange = Xchange()
         self.time_keeper = Timekeeper()
+        self.escrow = Escrow(2000)
+        self.cc_desjardins = CreditCard('Desjardins', 900.00)
+        self.cc_costco = CreditCard('CIBC Costco', 600.00)
         self.font = ('arial',20)
         self.root = root
         row_zero_label_width = 15
         days_left_font = ('arial', 30)
-        
-        self.days_left_in_the_month_label_frame = tk.LabelFrame(self.root, text='Days Left in the Month')
-        self.days_left_in_the_month_label_frame.grid(row=3, column=1)
-        self.day_left_in_the_month_label = tk.Label(self.days_left_in_the_month_label_frame, width = 5, height=2, text=self.time_keeper.get_days_left_in_the_month(), font=days_left_font)
-        self.day_left_in_the_month_label.grid(row=0, column=0)
-        
+                
         self.salary.set_regular_salary(1200)
         self.salary.set_lazy_salary(1)
         dat = self.salary.get_all_salary_data()
@@ -78,12 +72,33 @@ class LazyRichMainScreen():
         self.div_tree.heading("Total Value", text= "Total Value")
         self.div_tree.grid(row=0,column=0)
         
+        self.days_left_in_the_month_label_frame = tk.LabelFrame(self.root, text='Days Left in the Month')
+        self.days_left_in_the_month_label_frame.grid(row=3, column=1)
+        self.day_left_in_the_month_label = tk.Label(self.days_left_in_the_month_label_frame, width = 5, height=2, text=self.time_keeper.get_days_left_in_the_month(), font=days_left_font)
+        self.day_left_in_the_month_label.grid(row=0, column=0)
+        
+        self.escrow_label_frame = tk.LabelFrame(self.root, text='Money in Escrow')
+        self.escrow_label_frame.grid(row=3, column=0)
+        self.escrow_label = tk.Label(self.escrow_label_frame, width = row_zero_label_width, text=self.escrow.get_balance_string(), font=days_left_font)
+        self.escrow_label.grid(row=0, column=0)
+        
+        self.cc_label_frame = tk.LabelFrame(self.root, text='Credit Cards')
+        self.cc_label_frame.grid(row=3, column = 2)
+        self.desjardins_label_frame = tk.LabelFrame(self.cc_label_frame, text = self.cc_desjardins.get_card_id_string(), labelanchor='n')
+        self.desjardins_label_frame.grid(row=0, column=0)
+        self.desjardins = tk.Label(self.desjardins_label_frame, width=row_zero_label_width, text=self.cc_desjardins.get_balance(), font = self.font)
+        self.desjardins.grid(row=0, column=0)
+        self.cibc_label_frame = tk.LabelFrame(self.cc_label_frame, text = self.cc_costco.get_card_id_string(), labelanchor='n')
+        self.cibc_label_frame.grid(row=1, column=0)
+        self.cibc = tk.Label(self.cibc_label_frame, width=row_zero_label_width, text=self.cc_costco.get_balance(), font = self.font)
+        self.cibc.grid(row=1, column=0)
+        
 
 root = tk.Tk()
 root.title('Portfolio')
 width=root.winfo_screenmmwidth()//2
 height=root.winfo_screenheight()//2
-root.geometry('1200x800+{}+{}'.format(height,width))
+root.geometry('1200x1000+{}+{}'.format(height,width))
 root.columnconfigure(0, weight=1)
 root.columnconfigure(1, weight=1)
 root.columnconfigure(2, weight=1)

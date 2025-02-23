@@ -1,0 +1,15 @@
+import tkinter as tk
+
+class CreditCardsOverview:
+    def __init__(self):
+        pass
+
+root = tk.Tk()
+window_width = 600
+window_height = 300
+screen_width = root.winfo_screenwidth()  # returns the width of the screen :inlineRefs{references="&#91;&#123;&quot;type&quot;&#58;&quot;inline_reference&quot;,&quot;start_index&quot;&#58;468,&quot;end_index&quot;&#58;471,&quot;number&quot;&#58;0,&quot;url&quot;&#58;&quot;https&#58;//pythonprogramming.altervista.org/how-to-center-your-window-with-tkinter-in-python/&quot;,&quot;favicon&quot;&#58;&quot;https&#58;//imgs.search.brave.com/rcoKan08WNzOqZIReNj6dLAEuZ6AKMxkwPs7qbOLz48/rs&#58;fit&#58;32&#58;32&#58;1&#58;0/g&#58;ce/aHR0cDovL2Zhdmlj/b25zLnNlYXJjaC5i/cmF2ZS5jb20vaWNv/bnMvMDI5ZjYwNzgz/ZjhiODQ5ZjBiYjdh/YzMwM2RkMGQ5NzQ4/NDc0ZDA1NTlmODg3/NWJkY2U4YTBjM2M5/YWRhNGVhZS9weXRo/b25wcm9ncmFtbWlu/Zy5hbHRlcnZpc3Rh/Lm9yZy8&quot;,&quot;snippet&quot;&#58;&quot;import&#32;tkinter&#32;as&#32;tk&#32;from&#32;tkinter&#32;import&#32;ttk&#32;root&#32;=&#32;tk.Tk()&#32;root.title('Centered&#32;window')&#32;window_height&#32;=&#32;530&#32;window_width&#32;=&#32;800&#32;def&#32;center_screen()&#58;&#32;\&quot;\&quot;\&quot;&#32;gets&#32;the&#32;coordinates&#32;of&#32;the&#32;center&#32;of&#32;the&#32;screen&#32;\&quot;\&quot;\&quot;&#32;global&#32;screen_height,&#32;screen_width,&#32;x_cordinate,&#32;y_cordinate&#32;screen_width&#32;=&#32;root.winfo_screenwidth()&#32;screen_height&#32;=&#32;root.winfo_screenheight()&#32;#&#32;Coordinates&#32;of&#32;the&#32;upper&#32;left&#32;corner&#32;of&#32;the&#32;wind…&quot;&#125;&#93;"}
+screen_height = root.winfo_screenheight()  # returns the height of the screen :inlineRefs{references="&#91;&#123;&quot;type&quot;&#58;&quot;inline_reference&quot;,&quot;start_index&quot;&#58;553,&quot;end_index&quot;&#58;556,&quot;number&quot;&#58;0,&quot;url&quot;&#58;&quot;https&#58;//pythonprogramming.altervista.org/how-to-center-your-window-with-tkinter-in-python/&quot;,&quot;favicon&quot;&#58;&quot;https&#58;//imgs.search.brave.com/rcoKan08WNzOqZIReNj6dLAEuZ6AKMxkwPs7qbOLz48/rs&#58;fit&#58;32&#58;32&#58;1&#58;0/g&#58;ce/aHR0cDovL2Zhdmlj/b25zLnNlYXJjaC5i/cmF2ZS5jb20vaWNv/bnMvMDI5ZjYwNzgz/ZjhiODQ5ZjBiYjdh/YzMwM2RkMGQ5NzQ4/NDc0ZDA1NTlmODg3/NWJkY2U4YTBjM2M5/YWRhNGVhZS9weXRo/b25wcm9ncmFtbWlu/Zy5hbHRlcnZpc3Rh/Lm9yZy8&quot;,&quot;snippet&quot;&#58;&quot;import&#32;tkinter&#32;as&#32;tk&#32;from&#32;tkinter&#32;import&#32;ttk&#32;root&#32;=&#32;tk.Tk()&#32;root.title('Centered&#32;window')&#32;window_height&#32;=&#32;530&#32;window_width&#32;=&#32;800&#32;def&#32;center_screen()&#58;&#32;\&quot;\&quot;\&quot;&#32;gets&#32;the&#32;coordinates&#32;of&#32;the&#32;center&#32;of&#32;the&#32;screen&#32;\&quot;\&quot;\&quot;&#32;global&#32;screen_height,&#32;screen_width,&#32;x_cordinate,&#32;y_cordinate&#32;screen_width&#32;=&#32;root.winfo_screenwidth()&#32;screen_height&#32;=&#32;root.winfo_screenheight()&#32;#&#32;Coordinates&#32;of&#32;the&#32;upper&#32;left&#32;corner&#32;of&#32;the&#32;wind…&quot;&#125;&#93;"}
+x = (screen_width/2) - (window_width/2)
+y = (screen_height/2) - (window_height/2)
+root.geometry('%dx%d+%d+%d' % (window_width, window_height, x, y))
+root.mainloop()

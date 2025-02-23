@@ -31,8 +31,6 @@ class WindowGridLayout:
     def __init__(self, window):
         self.window=window 
 
-           
-        
     def build_frame_grid(self, window_width, window_height):
         overview_width = 0.2*window_width
         frame_width_narrow = 0.3*window_width
@@ -107,8 +105,7 @@ class Menu:
         load_ticker_list_button = Button(self.main_display,text="Upload Tickers", command=self.upload_tickers_button_clicked, font=self.font)
         load_ticker_list_button.grid(row=1, column=0)
 
-        
-        
+           
     def display_monthly_account_audit(self):
         self.clear_frame(self.main_display)
         # OBJECTS.PY BANK OBJECT
@@ -162,8 +159,3 @@ class Menu:
         self.bank.account_withdrawal(100)
         self.update_overview()        
         
-        
-
-        
-        
-      
