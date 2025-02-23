@@ -4,6 +4,13 @@ from time_util import Timestamp
 from time_util import Timekeeper
 import requests
 
+class TextMoney:
+    def __init__(self):
+        pass
+    def cad(self,amount):
+        return '{:.2f}$ CAD'.format(amount)
+    def usd(self, amount):
+        return '{:.2f}$ USD'.format(amount)
 class Salary:
     def __init__(self):
         self.xchange = Xchange()
@@ -205,6 +212,11 @@ class CreditCard:
         self.balance-=amount
     def get_balance(self):
         return self.balance
+    def get_balance_string(self):
+        return TextMoney().cad(self.balance)
+    def set_balance(self, amount):
+        self.balance = amount
+        
         
 class Escrow:
     def __init__(self, balance):
