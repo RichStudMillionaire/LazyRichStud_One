@@ -17,6 +17,9 @@ class ChunkManager:
         self.list_length = len(ticker_list)
         self.total = 0
         self.count=0
+    def hard_pause(self, long_pause_in_seconds, ticker):
+        time.sleep(long_pause_in_seconds)
+        print('Zzzz going to sleep for {} seconds\nException happened while attempting to extract {}'.format(long_pause_in_seconds, ticker))
     def tally_click(self):
         self.count+=1
         self.check_tally_and_pause()
@@ -30,7 +33,9 @@ class ChunkManager:
             
 class Timekeeper:
     def __init__(self):
-        pass
+        self.current_day = datetime.today().day
+        self.current_month = datetime.today().month
+        self.current_year = datetime.today().year
     def set_datetime_object(self,yyyy, m, d, hours, minutes):
         return datetime(yyyy,m,d,hours, minutes)
     
@@ -57,7 +62,20 @@ class Timekeeper:
         nb = self.get_days_in_month(month)
         left = nb-day
         return left
-    def change_month(self, current):
-        if current+1 == datetime.today().month:
-            current = datetime.today().month
-        return current
+    def change_month(self):
+        if self.current_month+1 == datetime.today().month:
+            self.current_month = datetime.today().month
+            return self.current_month
+        self.change_year()
+        
+    def change_year(self):
+        if datetime.today().year == self.current_year + 1:
+            self.current_year += 1
+            self.current_month = 1
+            return self.current_year
+            
+            
+        
+    
+    
+    

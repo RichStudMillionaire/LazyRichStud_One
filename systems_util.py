@@ -1,6 +1,7 @@
 from memory_util import HardDrive
-from stocks_util import ExtractTickersFromCsv
-from stocks_util import TickerInfo
+from stock_info_util import ExtractTickersFromCsv
+from stock_info_util import TickerInfo
+from reports_util import Report
 
 
   
@@ -48,6 +49,7 @@ class GrowthSystem:
         
 class DividendSystem:
     def __init__(self):
+        self.reports = Report()
         self.id = "Dividends System"
         self.hard_drive = HardDrive()
         self.info = TickerInfo()
@@ -77,9 +79,16 @@ class DividendSystem:
     def restore_session(self):
         self.filtered_list = self.info.high_dividend_filter(self.session)
         self.filtered_list = self.info.fifty_two_week_low_filter(self.filtered_list,5)
-        self.filtered_list = self.info.payout_ratio_filter(self.filtered_list)
-        self.finalists = self.info.get_str_from_dict(self.filtered_list)
-        print(self.finalists)
+        self.filtered_list = self.info.payout_ratio_filter(self.filtered_list) 
+        self.finalists = self.filtered_list
+        self.report = {}
+        final_list = self.info.get_str_from_dict(self.finalists)
+        print(final_list)
+        
+        self.report['system'] = self.id
+        self.report['finalists'] = self.finalists
+        self.reports.add_daily_report_item(self.report)
+        
         
 class CustomizableSystem:
     def __init__(self):

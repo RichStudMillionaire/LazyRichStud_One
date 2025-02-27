@@ -3,9 +3,7 @@ import json
 
 class HardDrive:
     def __init__(self):
-        self.list = {}
-        self.json_string = ""
-        
+        self.list = []
         
     def convert_dict_to_json_string(self):
         self.json_string = json.dumps(self.dict)

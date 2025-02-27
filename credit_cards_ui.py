@@ -40,7 +40,7 @@ class CreditCards:
             self.desjardins_entry = tk.Entry(self.desjardins_label_frame, font=self.font1, width=self.width_1)
             self.desjardins_entry.columnconfigure(0,weight=1)
             self.desjardins_entry.grid(row=0, column=0)
-            self.desjardins_confirm = tk.Button(self.desjardins_label_frame, text='Confirm', command=self.confirm_desjardins, font=self.font1)
+            self.desjardins_confirm = tk.Button(self.desjardins_label_frame, text='Confirm', command=self.confirm_desjardins, font=self.font1, relief='ridge')
             self.desjardins_confirm.grid(row=0, column=1)
             self.desjardins_button.columnconfigure(1,weight=1)
         elif card_string == 'cibc':
@@ -49,7 +49,7 @@ class CreditCards:
             self.cibc_entry = tk.Entry(self.cibc_label_frame, font=self.font1, width=self.width_1)
             self.cibc_entry.columnconfigure(0,weight=1)
             self.cibc_entry.grid(row=1, column=0)
-            self.cibc_confirm = tk.Button(self.cibc_label_frame, text='Confirm', command=self.confirm_cibc, font=self.font1)
+            self.cibc_confirm = tk.Button(self.cibc_label_frame, text='Confirm', command=self.confirm_cibc, font=self.font1, relief='ridge')
             self.cibc_confirm.grid(row=1, column=1)
             self.cibc_button.columnconfigure(1,weight=1)
     def confirm_desjardins(self):

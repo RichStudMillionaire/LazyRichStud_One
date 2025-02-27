@@ -3,46 +3,57 @@ from time_util import ChunkManager
 from time_util import Timestamp
 import operator
 import csv
+from memory_util import HardDrive
 
 class TickerInfo:
     def __init__(self):
         pass
+    def get_single_ticker_history(self,ticker):
+        dat =yf.Ticker(ticker)
+        stock_history_dict = dat.history(period='12mo')
+        self.print_single_ticker_rpt(stock_history_dict)
     def get_single_ticker_info_complete(self, ticker):
         dat = yf.Ticker(ticker)
         stock_info_dict=dat.info
         self.print_single_ticker_rpt(stock_info_dict)
         
     def get_single_ticker_info_slim(self, ticker):
-        dat = yf.Ticker(ticker)
-        info=dat.info
-        keys_to_keep = ['symbol', 'dayHigh', 'fiftyDayAverage', 'twoHundredDayAverage', 'targetHighPrice', 'targetLowPrice', 'targetMedianPrice', 'fiftyTwoWeekLow', 
+        try:
+            dat = yf.Ticker(ticker)
+            info=dat.info
+            keys_to_keep = ['symbol', 'dayHigh', 'fiftyDayAverage', 'twoHundredDayAverage', 'targetHighPrice', 'targetLowPrice', 'targetMedianPrice', 'fiftyTwoWeekLow', 
                         'dividendYield', 'payoutRatio', 'fiveYearAverageYield', 'lastDividendValue','lastDividendDate', 'trailingEps', 'forwardEps']
-        stock_info_slim_dict = {key: info[key] for key in keys_to_keep if key in info}
-        key_to_verify_dividend = 'dividendYield'
-        if key_to_verify_dividend in stock_info_slim_dict:
-            stock_info_slim_dict["stockPaysDividends"] = True
-            if stock_info_slim_dict['dividendYield'] > 0.05:
-                stock_info_slim_dict['stockPaysHighDividends'] = True
-            elif stock_info_slim_dict['dividendYield'] < 0.01:
-                stock_info_slim_dict['stockPaysLowDividends'] = True
+            stock_info_slim_dict = {key: info[key] for key in keys_to_keep if key in info}
+            key_to_verify_dividend = 'dividendYield'
+            if key_to_verify_dividend in stock_info_slim_dict:
+                stock_info_slim_dict["stockPaysDividends"] = True
+                if stock_info_slim_dict['dividendYield'] > 0.05:
+                    stock_info_slim_dict['stockPaysHighDividends'] = True
+                elif stock_info_slim_dict['dividendYield'] < 0.01:
+                    stock_info_slim_dict['stockPaysLowDividends'] = True
             
-        else:
-            stock_info_slim_dict['stockPaysDividends'] = False
-        self.print_single_ticker_rpt(stock_info_slim_dict)
-        return stock_info_slim_dict
+            else:
+                stock_info_slim_dict['stockPaysDividends'] = False   
+            return stock_info_slim_dict
+        except Exception as e:
+            stock_info_slim_dict = {}
+            stock_info_slim_dict['symbol'] = ticker
+            stock_info_slim_dict['Trouble Extracting'] = str(e)
+            return stock_info_slim_dict
+
     
     def get_info_from_ticker_list(self, ticker_list):
         list = []
         chunk_manager = ChunkManager(150,60,ticker_list)
         for ticker in ticker_list:
             chunk_manager.tally_click()
-            list.append(self.get_single_ticker_info_slim(ticker))
+            slim_dict = self.get_single_ticker_info_slim(ticker)
+            list.append(slim_dict)
         return list
     
     def no_or_low_dividend_filter(self, list_of_slim_dicts):
         filtered_list = []
         for slim_dict in list_of_slim_dicts:
-            print(slim_dict)
             if slim_dict['stockPaysDividends'] == False:
                 filtered_list.append(slim_dict)
             elif 'stockPaysLowDividends' in slim_dict and slim_dict['stockPaysLowDividends'] == True:
@@ -156,6 +167,7 @@ class ExtractTickersFromCsv:
         try:
             with open(nasdaq_file, 'r') as file:
                 reader = csv.reader(file)
+                next(reader)
                 self.nasdaq = [row[0].strip() for row in reader]
         except Exception as e:
             print(e)
@@ -163,12 +175,14 @@ class ExtractTickersFromCsv:
         try:
             with open(nyse_file, 'r') as file:
                 reader = csv.reader(file)
+                next(reader)
                 self.nyse = [row[0].strip() for row in reader]
         except Exception as e:
             print(e)
         
         self.nasdaq_and_nyse = self.nasdaq + self.nyse
-        
+        HardDrive().save(self.nasdaq_and_nyse, 'exctractedTickers.json')
+       
     def get_nasdaq(self):
         return self.nasdaq
     def get_nyse(self):

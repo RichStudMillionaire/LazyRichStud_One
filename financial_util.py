@@ -191,23 +191,52 @@ class Xchange:
         self.hard_drive.save(self.rates, 'exchangeRates.json')
         
 class CreditCard:
-    def __init__(self, card_id_string , first_balance):
+    def __init__(self, card_id_string , initial_balance):
         self.id = card_id_string
-        self.year = datetime.today().year
-        self.month = datetime.today().month
-        self.day = datetime.today().day
-        self.first_balance = first_balance
-        self.balance = first_balance
+
+        self.memory = HardDrive()
+        self.initial_balance = initial_balance
+        self.balance = 0
+        self.info={}
+        self.exist()
+        self.id = self.info['cardId']
+        self.balance = self.info['currentBalance']
+        self.year = self.info['currentYear']
+        self.month =self.info['currentMonth']
+        self.day = self.info['currentDay']
+        self.initial_balance = self.info['initialBalance']
+    def exist(self):
+        file = self.id+'.json'
+        self.info = self.memory.load(file)
+        if self.info == False:
+            self.info = {}
+            year = datetime.today().year
+            month = datetime.today().month
+            day = datetime.today().day
+            self.info['cardId'] = self.id 
+            self.info['initialBalance']=self.initial_balance
+            self.info['currentMonth'] = month
+            self.info['currentYear'] = year
+            self.info['currentDay'] = day
+            self.info['currentBalance'] = self.initial_balance
+            self.info['installments-6'] = self.get_installments(6)
+            self.info['installments-12'] = self.get_installments(12)
+            self.memory.save(self.info, file)
+            self.exist()
+            
     def get_card_id_string(self):
         return self.id
-    def get_6_months_installment(self, og_balance):
-        return round(og_balance/6,2)
-    def get_12_months_installment(self, og_balance):
-        return round(og_balance/12,2)
-    def get_18_months_installment(self,og_balance):
-        return round(og_balance/18,2)
-    def get_24_months_installment(self,og_balance):
-        return round(og_balance/24,2)
+    def get_installments(self, nb_of_installments):
+        initial = self.initial_balance
+        installment = self.initial_balance//(nb_of_installments)
+        installments = {}
+        for x in range(1,(nb_of_installments+1)):
+            initial-=installment
+            installments[x] = int(initial)
+    
+        return installments
+        
+            
     def make_payment(self,amount):
         self.balance-=amount
     def get_balance(self):
@@ -216,6 +245,13 @@ class CreditCard:
         return TextMoney().cad(self.balance)
     def set_balance(self, amount):
         self.balance = amount
+        self.info['currentBalance'] = amount
+        year = datetime.today().year
+        month = datetime.today().month
+        day = datetime.today().day
+        self.info['currentYear'] = year
+        self.info['currentMonth'] = month
+        self.info['currentDay'] = day
         
         
 class Escrow:
