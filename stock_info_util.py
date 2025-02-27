@@ -27,9 +27,9 @@ class TickerInfo:
             key_to_verify_dividend = 'dividendYield'
             if key_to_verify_dividend in stock_info_slim_dict:
                 stock_info_slim_dict["stockPaysDividends"] = True
-                if stock_info_slim_dict['dividendYield'] > 0.05:
+                if stock_info_slim_dict['dividendYield'] > 5.0:
                     stock_info_slim_dict['stockPaysHighDividends'] = True
-                elif stock_info_slim_dict['dividendYield'] < 0.01:
+                elif stock_info_slim_dict['dividendYield'] < 1.0:
                     stock_info_slim_dict['stockPaysLowDividends'] = True
             
             else:

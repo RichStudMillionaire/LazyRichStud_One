@@ -44,12 +44,10 @@ class GrowthSystem:
         print(len(self.filtered_info_three))
         self.filtered_info_four = self.info.no_penny_stocks_filter(self.filtered_info_three, 5)
         self.filtered_ticker_list = self.info.get_str_from_dict(self.filtered_info_four)
-        print(self.filtered_ticker_list)
         self.hard_drive.save(self.filtered_ticker_list, 'growthWinners.json')
         
 class DividendSystem:
     def __init__(self):
-        self.reports = Report()
         self.id = "Dividends System"
         self.hard_drive = HardDrive()
         self.info = TickerInfo()
@@ -81,13 +79,9 @@ class DividendSystem:
         self.filtered_list = self.info.fifty_two_week_low_filter(self.filtered_list,5)
         self.filtered_list = self.info.payout_ratio_filter(self.filtered_list) 
         self.finalists = self.filtered_list
-        self.report = {}
-        final_list = self.info.get_str_from_dict(self.finalists)
-        print(final_list)
-        
-        self.report['system'] = self.id
-        self.report['finalists'] = self.finalists
-        self.reports.add_daily_report_item(self.report)
+        final_list = self.info.get_str_from_dict(self.finalists)  
+        print(final_list)      
+
         
         
 class CustomizableSystem:

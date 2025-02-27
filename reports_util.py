@@ -23,15 +23,11 @@ class Report:
             credit_card['currentMonth'] = self.timekeeper.change_month()
             credit_card['currentYear'] = self.timekeeper.change_year()
     def print_daily_report(self):
-        for key, value in self.daily_report_dict.items():
-            print("{}\n{}".format(key,value))
-    def add_daily_report_item(self, item):
-        report = ""
-        self.daily_report_items.append(item)
-        for i in self.daily_report_items:
-            for key, value in i.items():
-                report+="{} : {}".format(key,value)
-        #print(report)
+        pass
+                
+    def include_in_daily_report(self, item):
+        pass
+        
                 
                 
     
