@@ -138,11 +138,14 @@ class TickerInfo:
         return list
         
     def print_single_ticker_rpt(self, ticker_info):
-        print("Date and time of the report : {}".format(Timestamp().now()))
-        print()
         for key, value in ticker_info.items():
             print("{} : {}".format(key,value))
         print()
+
+    
+    def print_multiple_ticker_rpts(self, dict_list):
+        for dict in dict_list:
+            self.print_single_ticker_rpt(dict)
         
     def sort_ascending(self, dict_list, key):
         try:

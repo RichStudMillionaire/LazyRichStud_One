@@ -79,8 +79,15 @@ class DividendSystem:
         self.filtered_list = self.info.fifty_two_week_low_filter(self.filtered_list,5)
         self.filtered_list = self.info.payout_ratio_filter(self.filtered_list) 
         self.finalists = self.filtered_list
-        final_list = self.info.get_str_from_dict(self.finalists)  
-        print(final_list)      
+        self.final_list = self.info.get_str_from_dict(self.finalists)  
+        self.deep_analysis()
+    def deep_analysis(self):
+        print(self.final_list)
+        print()
+        print('Highest Dividend')
+        highest_dividend = self.info.sort_descending(self.filtered_list, 'dividendYield')
+    
+        print(self.info.print_multiple_ticker_rpts(highest_dividend))      
 
         
         
