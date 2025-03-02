@@ -7,6 +7,7 @@ from reports_util import Report
   
 class GrowthSystem:
     def __init__(self):
+        self.report = Report()
         self.id = "Growth System"
         self.hard_drive = HardDrive()
         self.info = TickerInfo()
@@ -46,7 +47,7 @@ class GrowthSystem:
         
     def inDepthAnalysis(self):
         self.filtered_ticker_list = self.info.get_str_from_dict(self.filtered_info)
-        self.hard_drive.save(self.filtered_ticker_list, 'growthWinners.json')
+        self.report.add_system_winners_to_report(self.filtered_ticker_list)
         
 class DividendSystem:
     def __init__(self):
