@@ -35,15 +35,17 @@ class GrowthSystem:
         info_list=self.info.get_info_from_ticker_list(ticker_list)
         self.hard_drive.save(info_list, "ActiveSession.json")
     def restore_session(self):
-        self.session=self.hard_drive.load('ActiveSession.json')
-        self.filtered_info_one=self.info.no_or_low_dividend_filter(self.session)
-        self.hard_drive.save(self.filtered_info_one,'filterOneDividend.json')
-        self.filtered_info_two = self.info.below_fifty_day_moving_average_filter(self.filtered_info_one,20)
-        print(len(self.filtered_info_two))
-        self.filtered_info_three = self.info.below_median_price_target_filter(self.filtered_info_two,20)
-        print(len(self.filtered_info_three))
-        self.filtered_info_four = self.info.no_penny_stocks_filter(self.filtered_info_three, 5)
-        self.filtered_ticker_list = self.info.get_str_from_dict(self.filtered_info_four)
+        self.filtered_info=self.hard_drive.load('ActiveSession.json')
+        self.filtered_info=self.info.no_or_low_dividend_filter(self.filtered_info)
+        self.filtered_info= self.info.below_fifty_day_moving_average_filter(self.filtered_info,20)
+        self.filtered_info= self.info.below_median_price_target_filter(self.filtered_info,20)
+        self.filtered_info = self.info.no_penny_stocks_filter(self.filtered_info, 20)
+        self.filtered_info = self.info.uptrend_filter(self.filtered_info)
+        print(len(self.filtered_info))
+        self.inDepthAnalysis()
+        
+    def inDepthAnalysis(self):
+        self.filtered_ticker_list = self.info.get_str_from_dict(self.filtered_info)
         self.hard_drive.save(self.filtered_ticker_list, 'growthWinners.json')
         
 class DividendSystem:
@@ -82,9 +84,9 @@ class DividendSystem:
         self.final_list = self.info.get_str_from_dict(self.finalists)  
         self.deep_analysis()
     def deep_analysis(self):
-        print(self.final_list)
-        print()
-        print('Highest Dividend')
+        #print(self.final_list)
+        #print()
+        #print('Highest Dividend')
         highest_dividend = self.info.sort_descending(self.filtered_list, 'dividendYield')
     
         print(self.info.print_multiple_ticker_rpts(highest_dividend))      

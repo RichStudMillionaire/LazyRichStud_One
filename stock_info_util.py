@@ -51,13 +51,23 @@ class TickerInfo:
             list.append(slim_dict)
         return list
     
+    def uptrend_filter(self, list_of_slim_dicts):
+        filtered_list = []
+        for slim_dict in list_of_slim_dicts:
+            if 'fiftyDayAverage' in slim_dict and 'twoHundredDayAverage' in slim_dict:
+                if slim_dict['fiftyDayAverage'] > slim_dict['twoHundredDayAverage']:
+                    slim_dict['uptrendRate'] = (slim_dict['fiftyDayAverage'] - slim_dict['twoHundredDayAverage'])/slim_dict['twoHundredDayAverage']*100
+                    filtered_list.append(slim_dict)
+        return filtered_list            
+    
     def no_or_low_dividend_filter(self, list_of_slim_dicts):
         filtered_list = []
         for slim_dict in list_of_slim_dicts:
-            if slim_dict['stockPaysDividends'] == False:
-                filtered_list.append(slim_dict)
-            elif 'stockPaysLowDividends' in slim_dict and slim_dict['stockPaysLowDividends'] == True:
-                filtered_list.append(slim_dict)
+            if 'stockPaysDividends' in slim_dict:
+                if slim_dict['stockPaysDividends'] == False:
+                    filtered_list.append(slim_dict)
+                elif 'stockPaysLowDividends' in slim_dict and slim_dict['stockPaysLowDividends'] == True:
+                    filtered_list.append(slim_dict)
         return filtered_list
     
     def high_dividend_filter(self, list_of_slim_dicts):
@@ -152,14 +162,26 @@ class TickerInfo:
             sorted_list = sorted(dict_list, key=operator.itemgetter(key))
         except Exception as e:
             print("Could not sort list in ascending order with {} as key : {}".format(key,e))
-        return sorted_list
+        #return sorted_list
+        slimmed_list = []
+        for dict in sorted_list:
+            keys_list = ['symbol',key]
+            slimmed_dict =  {k:v for k,v in dict.items() if k in keys_list}
+            slimmed_list.append(slimmed_dict)
+        return slimmed_list
     
     def sort_descending(self, dict_list, key):
         try:
             sorted_list = sorted(dict_list, key=operator.itemgetter(key), reverse=True)
         except Exception as e:
             print("Could not sort list in descending order with {} as key : {}".format(key,e))
-        return sorted_list
+        #return sorted_list
+        slimmed_list = []
+        for dict in sorted_list:
+            keys_list = ['symbol',key]
+            slimmed_dict =  {k:v for k,v in dict.items() if k in keys_list}
+            slimmed_list.append(slimmed_dict)
+        return slimmed_list
      
 class ExtractTickersFromCsv:
     def __init__(self, nasdaq_file, nyse_file):
