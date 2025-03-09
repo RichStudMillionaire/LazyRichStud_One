@@ -4,6 +4,7 @@ from time_util import Timestamp
 import operator
 import csv
 from memory_util import HardDrive
+from datetime import datetime
 
 class TickerInfo:
     def __init__(self):
@@ -12,6 +13,18 @@ class TickerInfo:
         dat =yf.Ticker(ticker)
         stock_history_dict = dat.history(period='12mo')
         self.print_single_ticker_rpt(stock_history_dict)
+        
+    def get_single_ticker_max_history(self,ticker):
+        end_date = datetime.now().strftime('%Y-%m-%d')
+        dat = yf.Ticker(ticker)
+        history = dat.history(period= 'max', end = end_date)
+        dividends = dat.dividends
+        oldest_data = history.head()
+        self.print_single_ticker_rpt(dividends)
+        return history
+        
+        
+    
     def get_single_ticker_info_complete(self, ticker):
         dat = yf.Ticker(ticker)
         stock_info_dict=dat.info
@@ -137,6 +150,14 @@ class TickerInfo:
         for slim_dict in list_of_slim_dicts:
             if 'payoutRatio' in slim_dict:
                 if slim_dict['payoutRatio'] < 1:
+                    filtered_list.append(slim_dict)
+        return filtered_list
+    
+    def positive_eps_filter(self, list_of_slim_dicts):
+        filtered_list = []
+        for slim_dict in list_of_slim_dicts:
+            if 'forwardEps' in slim_dict and 'trailingEps' in slim_dict:
+                if slim_dict['forwardEps'] > 0 and slim_dict['trailingEps'] > 0 :
                     filtered_list.append(slim_dict)
         return filtered_list
                 

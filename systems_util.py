@@ -8,7 +8,7 @@ from reports_util import Report
 class GrowthSystem:
     def __init__(self):
         self.report = Report()
-        self.id = "Growth System"
+        self.id = "G-1"
         self.hard_drive = HardDrive()
         self.info = TickerInfo()
         self.nasdaq = []
@@ -42,16 +42,19 @@ class GrowthSystem:
         self.filtered_info= self.info.below_median_price_target_filter(self.filtered_info,20)
         self.filtered_info = self.info.no_penny_stocks_filter(self.filtered_info, 20)
         self.filtered_info = self.info.uptrend_filter(self.filtered_info)
+        self.filtered_info = self.info.positive_eps_filter(self.filtered_info)
         print(len(self.filtered_info))
         self.inDepthAnalysis()
         
     def inDepthAnalysis(self):
         self.filtered_ticker_list = self.info.get_str_from_dict(self.filtered_info)
         self.report.add_system_winners_to_report(self.filtered_ticker_list)
+        self.info.print_multiple_ticker_rpts(self.filtered_info)
         
 class DividendSystem:
     def __init__(self):
-        self.id = "Dividends System"
+        self.report = Report()
+        self.id = "D-1"
         self.hard_drive = HardDrive()
         self.info = TickerInfo()
         self.nasdaq = []
@@ -85,10 +88,8 @@ class DividendSystem:
         self.final_list = self.info.get_str_from_dict(self.finalists)  
         self.deep_analysis()
     def deep_analysis(self):
-        #print(self.final_list)
-        #print()
-        #print('Highest Dividend')
         highest_dividend = self.info.sort_descending(self.filtered_list, 'dividendYield')
+        self.report.add_system_winners_to_report(highest_dividend)
     
         print(self.info.print_multiple_ticker_rpts(highest_dividend))      
 

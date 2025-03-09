@@ -5,7 +5,7 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.units import inch
 from reportlab.lib.styles import getSampleStyleSheet
-from reportlab.platypus import Paragraph
+from reportlab.platypus import Paragraph, SimpleDocTemplate
 
 class Report:
     def __init__(self):
@@ -21,7 +21,7 @@ class Report:
         self.list_of_winners = """ """
         
         # Create PDF
-        self.c = canvas.Canvas(self.file, pagesize=letter)
+        self.c = canvas.Canvas(self.file, pagesize=letter, rightMargin = 0.5*inch)
         self.w, self.h = letter
         self.c.drawString(inch, self.h-inch, self.title) 
        
@@ -31,13 +31,14 @@ class Report:
         for ticker in list_of_winners[:]:
             i+=1
             if i >15:
-                self.list_of_winners += "\n"
+                self.list_of_winners += '<br /> '
                 i=0
             self.list_of_winners += "{} ".format(ticker)
 
 
         
         styles = getSampleStyleSheet()
+        doc = SimpleDocTemplate("LazySundayNews.pdf", leftMargin=0.5*inch, rightMargin = 0.5*inch)
         para = Paragraph(self.list_of_winners, styles["Normal"])
         para.wrapOn(self.c, self.w, self.h)
         para.drawOn(self.c, 1*inch, self.h-3.5*inch)
